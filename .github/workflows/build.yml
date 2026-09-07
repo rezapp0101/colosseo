@@ -1,0 +1,22 @@
+name: Build COLOSSEO
+on:
+  push:
+permissions:
+  contents: read
+concurrency:
+  group: build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Create lockfile when absent
+        run: test -f package-lock.json || npm install --package-lock-only --ignore-scripts
+      - run: npm ci
+      - run: npm run build
